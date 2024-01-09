@@ -1,0 +1,7 @@
+# Custom files
+.DS_Store
+*.zip
+
+# Python
+__pycache__/
+*.py[cod]
