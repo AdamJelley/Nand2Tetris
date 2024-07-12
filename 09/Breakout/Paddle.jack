@@ -4,8 +4,10 @@
  * Has a screen location, height and width.
  */
  class Paddle {
-    field int x, y; // Paddle's scren location.
-    field int width, height; // Paddle's width and height.
+    field int x, y;             // Paddle's scren location.
+    field int width, height;    // Paddle's width and height.
+    field int direction;        // Direction of the paddle's movement
+                                // (0=stop, 1=left, 2=right)
 
     /** Constructs a new paddle with given location and width. */
     constructor Paddle new(int Ax, int Ay, int Awidth, int Aheight) {
@@ -13,6 +15,7 @@
         let y = Ay;
         let width = Awidth;
         let height = Aheight;
+        let direction = 0;
         do show();
         return this;
     }
@@ -40,6 +43,35 @@
     /** Draws the paddle. */
     method void draw() {
         do Screen.drawRectangle(x, y, x + width, y + height);
+        return;
+    }
+
+    /** Sets the paddle's direction (0=stop, 1=left, 2=right). */
+    method void setDirection(int Adirection) {
+        let direction = Adirection;
+        return;
+    }
+
+    /** Moves the paddle one step in the paddle's direction. */
+    method void move() {
+        if (direction = 1) {
+            let x = x - 4;
+            if (x < 0) { let x = 0; }
+            do Screen.setColor(false);
+            do Screen.drawRectangle((x + width) + 1, y, (x + width) + 4, y + height);
+            do Screen.setColor(true);
+            do Screen.drawRectangle(x, y, x + 3, y + height);
+        }
+        else {
+            if (direction = 2) {
+                let x = x + 4;
+                if ((x + width) > 511) { let x = 511 - width; }
+                do Screen.setColor(false);
+                do Screen.drawRectangle(x - 4, y, x - 1, y + height);
+                do Screen.setColor(true);
+                do Screen.drawRectangle((x + width) -3, y, x + width, y + height);
+            }
+        }
         return;
     }
  }

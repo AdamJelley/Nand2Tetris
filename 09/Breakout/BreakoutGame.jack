@@ -35,10 +35,20 @@ class BreakoutGame {
             // waits for a key to be pressed
             while ((key = 0) & (~exit)) {
                 let key = Keyboard.keyPressed();
+                do paddle.move();
                 do Sys.wait(50);
             }
 
-            if (key = 140) { let exit = true; }
+            if (key = 130) { do paddle.setDirection(1); }
+            else {
+                if (key = 132) { do paddle.setDirection(2); }
+                else {
+                    if ((key = 131) | (key = 133)) { do paddle.setDirection(0); }
+                    else {
+                        if (key = 140) { let exit = true; }
+                    }
+                }
+            }
 
             // Waits for the key to be released.
             while ((~(key = 0)) & (~exit)) {

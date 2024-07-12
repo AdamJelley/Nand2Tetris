@@ -46,21 +46,67 @@ not
 if-goto WHILE_END1
 call Keyboard.keyPressed 0
 pop local 0
+push this 0
+call Paddle.move 1
+pop temp 0
 push constant 50
 call Sys.wait 1
 pop temp 0
 goto WHILE_EXP1
 label WHILE_END1
 push local 0
-push constant 140
+push constant 130
 eq
 if-goto IF_TRUE0
 goto IF_FALSE0
 label IF_TRUE0
+push this 0
+push constant 1
+call Paddle.setDirection 2
+pop temp 0
+goto IF_END0
+label IF_FALSE0
+push local 0
+push constant 132
+eq
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
+push this 0
+push constant 2
+call Paddle.setDirection 2
+pop temp 0
+goto IF_END1
+label IF_FALSE1
+push local 0
+push constant 131
+eq
+push local 0
+push constant 133
+eq
+or
+if-goto IF_TRUE2
+goto IF_FALSE2
+label IF_TRUE2
+push this 0
+push constant 0
+call Paddle.setDirection 2
+pop temp 0
+goto IF_END2
+label IF_FALSE2
+push local 0
+push constant 140
+eq
+if-goto IF_TRUE3
+goto IF_FALSE3
+label IF_TRUE3
 push constant 0
 not
 pop this 2
-label IF_FALSE0
+label IF_FALSE3
+label IF_END2
+label IF_END1
+label IF_END0
 label WHILE_EXP2
 push local 0
 push constant 0
