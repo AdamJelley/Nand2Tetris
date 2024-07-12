@@ -1,0 +1,52 @@
+/**
+ * Represents a Breakout game.
+ */
+class BreakoutGame {
+
+    field Paddle paddle;      // paddle
+    field int paddleWidth; // width of paddle
+    field boolean exit; // true when the game is over
+
+    /* Constructs a new Breakout game. */
+    constructor BreakoutGame new() {
+        do Screen.clearScreen();
+        let paddleWidth = 40;  // initial paddle size
+        let paddle = Paddle.new(230, 229, paddleWidth, 7);
+
+        let exit = false;
+
+        return this;
+    }
+
+    /** Deallocates the object's memory. */
+    method void dispose() {
+        do paddle.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    /** Starts the game, and handles input from the user that
+     * controls the paddle's movement direction.
+     */
+    method void run() {
+        var char key;
+
+        while (~exit) {
+            // waits for a key to be pressed
+            while ((key = 0) & (~exit)) {
+                let key = Keyboard.keyPressed();
+                do Sys.wait(50);
+            }
+
+            if (key = 140) { let exit = true; }
+
+            // Waits for the key to be released.
+            while ((~(key = 0)) & (~exit)) {
+                let key = Keyboard.keyPressed();
+                do Sys.wait(50);
+            }
+        }
+
+        return;
+    }
+}

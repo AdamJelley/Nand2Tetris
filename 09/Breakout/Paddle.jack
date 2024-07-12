@@ -1,0 +1,45 @@
+/**
+ * A graphical paddle for a Breakout game.
+ * Displayed as a filled horizontal rectangle.
+ * Has a screen location, height and width.
+ */
+ class Paddle {
+    field int x, y; // Paddle's scren location.
+    field int width, height; // Paddle's width and height.
+
+    /** Constructs a new paddle with given location and width. */
+    constructor Paddle new(int Ax, int Ay, int Awidth, int Aheight) {
+        let x = Ax;
+        let y = Ay;
+        let width = Awidth;
+        let height = Aheight;
+        do show();
+        return this;
+    }
+
+    /** Deallocates the object's memory. */
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    /** Shows the paddle. */
+    method void show() {
+        do Screen.setColor(true);
+        do draw();
+        return;
+    }
+
+    /** Hides the paddle. */
+    method void hide() {
+        do Screen.setColor(false);
+        do draw();
+        return;
+    }
+
+    /** Draws the paddle. */
+    method void draw() {
+        do Screen.drawRectangle(x, y, x + width, y + height);
+        return;
+    }
+ }
