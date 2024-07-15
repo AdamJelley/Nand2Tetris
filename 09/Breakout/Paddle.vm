@@ -70,6 +70,18 @@ push argument 1
 pop this 4
 push constant 0
 return
+function Paddle.getLeft 0
+push argument 0
+pop pointer 0
+push this 0
+return
+function Paddle.getRight 0
+push argument 0
+pop pointer 0
+push this 0
+push this 2
+add
+return
 function Paddle.move 0
 push argument 0
 pop pointer 0

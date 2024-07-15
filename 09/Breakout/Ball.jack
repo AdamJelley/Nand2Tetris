@@ -1,0 +1,173 @@
+/**
+ * A graphical ball in a Breakout game.
+ * Had methods for drawing, erasing and moving.
+ * The ball is displayed as a filled 6x6 rectangle.
+ */
+class Ball {
+
+    field int x, y;     // Location (in pixels)
+    field int size;    // Ball size
+    field int leftWall, rightWall, topWall, bottomWall; // Wall locations
+    field int wall;     // Last wall ball bounced from
+                        // (0 = None, 1 = Left, 2 = Right, 3 = Top, 4 = Bottom)
+    field int destx, desty, prevDestx, prevDesty; // Next and previous trajectory destinations
+    field int dx, dy;   // Difference between dests and prev dests
+
+    /** Constructs a new ball with the given initial location and wall locations. */
+    constructor Ball new(int Ax, int Ay, int AleftWall, int ArightWall, int AtopWall, int AbottomWall) {
+        let x = Ax;
+        let y = Ay;
+        let size = 5;
+        let prevDestx = Ax;
+        let prevDesty = Ay;
+        let leftWall = AleftWall;
+        let rightWall = ArightWall - size - 1; // Include ball size
+        let topWall = AtopWall;
+        let bottomWall = AbottomWall - size - 1; // Inlcude ball size
+        let wall = 0;
+        do show();
+        return this;
+    }
+
+    /** Deallocates the ball's memory. */
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    /** Shows the ball. */
+    method void show() {
+        do Screen.setColor(true);
+        do draw();
+        return;
+    }
+
+    /** Hides the ball. */
+    method void hide() {
+        do Screen.setColor(false);
+        do draw();
+        return;
+    }
+
+    /** Draws the ball. */
+    method void draw() {
+        do Screen.drawRectangle(x, y, x + size, y + size);
+        return;
+    }
+
+    /** Sets the ball's destination. */
+    method void setDestination(int Adestx, int Adesty) {
+        let destx = Adestx;
+        let desty = Adesty;
+        let dx = destx - x;
+        let dy = desty - y;
+        return;
+    }
+
+    /** Gets the ball's left edge. */
+    method int getLeft() {
+        return x;
+    }
+
+    /** Gets the ball's right edge. */
+    method int getRight() {
+        return x + size;
+    }
+
+    /**
+     * Moves the ball one step towards its destination.
+     * If the ball has reached a wall, return the wall number.
+     * Else return the last wall number.
+     */
+     method int move() {
+        var int absdx, absdy;
+
+        do hide();
+
+        let absdx = Math.abs(dx);
+        let absdy = Math.abs(dy);
+
+        if ((dx > 0) & (dy > 0)) {
+            if (absdx > absdy) {
+                let y = y + 4;
+                let x = x + ((absdx * 4) / absdy);
+            }
+            else {
+                let x = x + 4;
+                let y = y + ((absdy * 4) / absdx);
+            }
+        }
+        if ((dx > 0) & (dy < 0)) {
+            if (absdx > absdy) {
+                let y = y - 4;
+                let x = x + ((absdx * 4) / absdy);
+            }
+            else {
+                let x = x + 4;
+                let y = y - ((absdy * 4) / absdx);
+            }
+        }
+        if ((dx < 0) & (dy > 0)) {
+            if (absdx > absdy) {
+                let y = y + 4;
+                let x = x - ((absdx * 4) / absdy);
+            }
+            else {
+                let x = x - 4;
+                let y = y + ((absdy * 4) / absdx);
+            }
+        }
+        if ((dx < 0) & (dy < 0)) {
+            if (absdx > absdy) {
+                let y = y - 4;
+                let x = x - ((absdx * 4) / absdy);
+            }
+            else {
+                let x = x - 4;
+                let y = y - ((absdy * 4) / absdx);
+            }
+        }
+
+        if (~(x > leftWall)) {
+            let wall = 1;
+            let x = leftWall;
+        }
+        if (~(x < rightWall)) {
+            let wall = 2;
+            let x = rightWall;
+        }
+        if (~(y > topWall)) {
+            let wall = 3;
+            let y = topWall;
+        }
+        if (~(y < bottomWall)) {
+            let wall = 4;
+            let y = bottomWall;
+        }
+
+        do show();
+
+        return wall;
+     }
+
+     method void bounce() {
+
+        if ((wall = 1) | (wall =2)) {
+            let desty = 2 * y - prevDesty;
+            let prevDesty = y;
+            let destx = prevDestx;
+            let prevDestx = x;
+        }
+        if ((wall = 3) | (wall = 4)) {
+            let destx = 2 * x - prevDestx;
+            let prevDestx = x;
+            let desty = prevDesty;
+            let prevDesty = y;
+        }
+
+        let dx = destx - x;
+        let dy = desty - y;
+
+        return;
+     }
+}

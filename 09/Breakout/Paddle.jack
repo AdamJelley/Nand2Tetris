@@ -52,6 +52,16 @@
         return;
     }
 
+    /** Gets the paddle's left edge. */
+    method int getLeft() {
+        return x;
+    }
+
+    /** Gets the paddle's right edge. */
+    method int getRight() {
+        return x + width;
+    }
+
     /** Moves the paddle one step in the paddle's direction. */
     method void move() {
         if (direction = 1) {

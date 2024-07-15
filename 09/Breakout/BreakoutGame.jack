@@ -3,16 +3,21 @@
  */
 class BreakoutGame {
 
-    field Paddle paddle;      // paddle
-    field int paddleWidth; // width of paddle
-    field boolean exit; // true when the game is over
+    field Ball ball;            // ball
+    field Paddle paddle;        // paddle
+    field int paddleWidth;      // width of paddle
+    field int wall;             // current wall the ball is bouncing off
+    field int lastWall;         /// last wall the ball bounced from
+    field boolean exit;         // true when the game is over
 
     /* Constructs a new Breakout game. */
     constructor BreakoutGame new() {
         do Screen.clearScreen();
         let paddleWidth = 40;  // initial paddle size
         let paddle = Paddle.new(230, 229, paddleWidth, 7);
-
+        let ball = Ball.new(253, 222, 0, 511, 0, 229);
+        do ball.setDestination(400, 0);
+        let lastWall = 0;
         let exit = false;
 
         return this;
@@ -21,6 +26,7 @@ class BreakoutGame {
     /** Deallocates the object's memory. */
     method void dispose() {
         do paddle.dispose();
+        do ball.dispose();
         do Memory.deAlloc(this);
         return;
     }
@@ -36,6 +42,7 @@ class BreakoutGame {
             while ((key = 0) & (~exit)) {
                 let key = Keyboard.keyPressed();
                 do paddle.move();
+                do moveBall();
                 do Sys.wait(50);
             }
 
@@ -53,8 +60,29 @@ class BreakoutGame {
             // Waits for the key to be released.
             while ((~(key = 0)) & (~exit)) {
                 let key = Keyboard.keyPressed();
+                do paddle.move();
+                do moveBall();
                 do Sys.wait(50);
             }
+        }
+        return;
+    }
+
+    /** Handles ball movement, including bouncing.
+      * If the ball bounces off a wall, calculate its new destination.
+      * End the game if the ball misses the paddle.
+      */
+    method void moveBall() {
+        //var int batLeft, batRight, ballLeft, ballRight;
+
+        let wall = ball.move();
+
+        if ((wall > 0) & (~(wall = lastWall))) {
+            if (wall = 4) {
+                let exit = ((paddle.getLeft() > ball.getRight()) | (paddle.getRight() < ball.getLeft()));
+            }
+            do ball.bounce();
+            let lastWall = wall;
         }
 
         return;
