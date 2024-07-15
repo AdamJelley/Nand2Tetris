@@ -7,18 +7,26 @@ class BreakoutGame {
     field Paddle paddle;        // paddle
     field int paddleWidth;      // width of paddle
     field int wall;             // current wall the ball is bouncing off
-    field int lastWall;         /// last wall the ball bounced from
+    field int lastWall;         // last wall the ball bounced from
+    field int score;            // current game score
     field boolean exit;         // true when the game is over
 
     /* Constructs a new Breakout game. */
     constructor BreakoutGame new() {
         do Screen.clearScreen();
         let paddleWidth = 40;  // initial paddle size
-        let paddle = Paddle.new(230, 229, paddleWidth, 7);
-        let ball = Ball.new(253, 222, 0, 511, 0, 229);
+        let paddle = Paddle.new(230, 248, paddleWidth, 7);
+        let ball = Ball.new(253, 240, 13, 499, 28, 248);
         do ball.setDestination(400, 0);
+        do Screen.drawRectangle(0, 15, 511, 27);
+        do Screen.drawRectangle(0, 28 , 12, 255);
+        do Screen.drawRectangle(499, 28 , 511, 255);
         let lastWall = 0;
+        let score = 0;
         let exit = false;
+
+        do Output.moveCursor(0,28);
+        do Output.printString("Score: 0");
 
         return this;
     }
@@ -65,6 +73,15 @@ class BreakoutGame {
                 do Sys.wait(50);
             }
         }
+
+        if (exit) {
+            do Output.moveCursor(11,27);
+            do Output.printString("Game Over!");
+            do Output.moveCursor(13,25);
+            do Output.printString("Final Score: ");
+            do Output.moveCursor(13,38);
+            do Output.printInt(score);
+        }
         return;
     }
 
@@ -80,6 +97,14 @@ class BreakoutGame {
         if ((wall > 0) & (~(wall = lastWall))) {
             if (wall = 4) {
                 let exit = ((paddle.getLeft() > ball.getRight()) | (paddle.getRight() < ball.getLeft()));
+                if (~exit) {
+                    let score = score + 1;
+                    do Output.moveCursor(0, 35);
+                    do Output.printInt(score);
+                }
+                else {
+                    do ball.hide();
+                }
             }
             do ball.bounce();
             let lastWall = wall;

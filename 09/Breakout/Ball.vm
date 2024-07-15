@@ -110,6 +110,13 @@ push this 0
 push this 2
 add
 return
+function Ball.getBottom 0
+push argument 0
+pop pointer 0
+push this 1
+push this 2
+add
+return
 function Ball.move 2
 push argument 0
 pop pointer 0

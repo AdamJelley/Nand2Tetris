@@ -1,5 +1,5 @@
 function BreakoutGame.new 0
-push constant 6
+push constant 7
 call Memory.alloc 1
 pop pointer 0
 call Screen.clearScreen 0
@@ -7,17 +7,17 @@ pop temp 0
 push constant 40
 pop this 2
 push constant 230
-push constant 229
+push constant 248
 push this 2
 push constant 7
 call Paddle.new 4
 pop this 1
 push constant 253
-push constant 222
-push constant 0
-push constant 511
-push constant 0
-push constant 229
+push constant 240
+push constant 13
+push constant 499
+push constant 28
+push constant 248
 call Ball.new 6
 pop this 0
 push this 0
@@ -26,9 +26,53 @@ push constant 0
 call Ball.setDestination 3
 pop temp 0
 push constant 0
+push constant 15
+push constant 511
+push constant 27
+call Screen.drawRectangle 4
+pop temp 0
+push constant 0
+push constant 28
+push constant 12
+push constant 255
+call Screen.drawRectangle 4
+pop temp 0
+push constant 499
+push constant 28
+push constant 511
+push constant 255
+call Screen.drawRectangle 4
+pop temp 0
+push constant 0
 pop this 4
 push constant 0
 pop this 5
+push constant 0
+pop this 6
+push constant 0
+push constant 28
+call Output.moveCursor 2
+pop temp 0
+push constant 8
+call String.new 1
+push constant 83
+call String.appendChar 2
+push constant 99
+call String.appendChar 2
+push constant 111
+call String.appendChar 2
+push constant 114
+call String.appendChar 2
+push constant 101
+call String.appendChar 2
+push constant 58
+call String.appendChar 2
+push constant 32
+call String.appendChar 2
+push constant 48
+call String.appendChar 2
+call Output.printString 1
+pop temp 0
 push pointer 0
 return
 function BreakoutGame.dispose 0
@@ -49,7 +93,7 @@ function BreakoutGame.run 1
 push argument 0
 pop pointer 0
 label WHILE_EXP0
-push this 5
+push this 6
 not
 not
 if-goto WHILE_END0
@@ -57,7 +101,7 @@ label WHILE_EXP1
 push local 0
 push constant 0
 eq
-push this 5
+push this 6
 not
 and
 not
@@ -123,7 +167,7 @@ goto IF_FALSE3
 label IF_TRUE3
 push constant 0
 not
-pop this 5
+pop this 6
 label IF_FALSE3
 label IF_END2
 label IF_END1
@@ -133,7 +177,7 @@ push local 0
 push constant 0
 eq
 not
-push this 5
+push this 6
 not
 and
 not
@@ -153,6 +197,80 @@ goto WHILE_EXP2
 label WHILE_END2
 goto WHILE_EXP0
 label WHILE_END0
+push this 6
+if-goto IF_TRUE4
+goto IF_FALSE4
+label IF_TRUE4
+push constant 11
+push constant 27
+call Output.moveCursor 2
+pop temp 0
+push constant 10
+call String.new 1
+push constant 71
+call String.appendChar 2
+push constant 97
+call String.appendChar 2
+push constant 109
+call String.appendChar 2
+push constant 101
+call String.appendChar 2
+push constant 32
+call String.appendChar 2
+push constant 79
+call String.appendChar 2
+push constant 118
+call String.appendChar 2
+push constant 101
+call String.appendChar 2
+push constant 114
+call String.appendChar 2
+push constant 33
+call String.appendChar 2
+call Output.printString 1
+pop temp 0
+push constant 13
+push constant 25
+call Output.moveCursor 2
+pop temp 0
+push constant 13
+call String.new 1
+push constant 70
+call String.appendChar 2
+push constant 105
+call String.appendChar 2
+push constant 110
+call String.appendChar 2
+push constant 97
+call String.appendChar 2
+push constant 108
+call String.appendChar 2
+push constant 32
+call String.appendChar 2
+push constant 83
+call String.appendChar 2
+push constant 99
+call String.appendChar 2
+push constant 111
+call String.appendChar 2
+push constant 114
+call String.appendChar 2
+push constant 101
+call String.appendChar 2
+push constant 58
+call String.appendChar 2
+push constant 32
+call String.appendChar 2
+call Output.printString 1
+pop temp 0
+push constant 13
+push constant 38
+call Output.moveCursor 2
+pop temp 0
+push this 5
+call Output.printInt 1
+pop temp 0
+label IF_FALSE4
 push constant 0
 return
 function BreakoutGame.moveBall 0
@@ -189,7 +307,29 @@ push this 0
 call Ball.getLeft 1
 lt
 or
+pop this 6
+push this 6
+not
+if-goto IF_TRUE2
+goto IF_FALSE2
+label IF_TRUE2
+push this 5
+push constant 1
+add
 pop this 5
+push constant 0
+push constant 35
+call Output.moveCursor 2
+pop temp 0
+push this 5
+call Output.printInt 1
+pop temp 0
+goto IF_END2
+label IF_FALSE2
+push this 0
+call Ball.hide 1
+pop temp 0
+label IF_END2
 label IF_FALSE1
 push this 0
 call Ball.bounce 1

@@ -74,6 +74,11 @@ class Ball {
         return x + size;
     }
 
+    /** Gets the ball's bottom edge. */
+    method int getBottom() {
+        return y + size;
+    }
+
     /**
      * Moves the ball one step towards its destination.
      * If the ball has reached a wall, return the wall number.

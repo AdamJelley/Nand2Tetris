@@ -96,12 +96,12 @@ push constant 4
 sub
 pop this 0
 push this 0
-push constant 0
+push constant 13
 lt
 if-goto IF_TRUE1
 goto IF_FALSE1
 label IF_TRUE1
-push constant 0
+push constant 13
 pop this 0
 label IF_FALSE1
 push constant 0
@@ -152,12 +152,12 @@ pop this 0
 push this 0
 push this 2
 add
-push constant 511
+push constant 498
 gt
 if-goto IF_TRUE3
 goto IF_FALSE3
 label IF_TRUE3
-push constant 511
+push constant 498
 push this 2
 sub
 pop this 0

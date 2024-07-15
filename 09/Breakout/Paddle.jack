@@ -66,7 +66,7 @@
     method void move() {
         if (direction = 1) {
             let x = x - 4;
-            if (x < 0) { let x = 0; }
+            if (x < 13) { let x = 13; }
             do Screen.setColor(false);
             do Screen.drawRectangle((x + width) + 1, y, (x + width) + 4, y + height);
             do Screen.setColor(true);
@@ -75,7 +75,7 @@
         else {
             if (direction = 2) {
                 let x = x + 4;
-                if ((x + width) > 511) { let x = 511 - width; }
+                if ((x + width) > 498) { let x = 498 - width; }
                 do Screen.setColor(false);
                 do Screen.drawRectangle(x - 4, y, x - 1, y + height);
                 do Screen.setColor(true);
