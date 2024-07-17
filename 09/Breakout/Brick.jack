@@ -1,0 +1,89 @@
+/**
+ * Represents the bricks in a Breakout game.
+ */
+class Brick {
+     field int x, y;            // the brick location
+     field int width, height;   // the brick size
+     field int face;            // face of brick hit
+     field boolean broken;      // if the brick is broken
+
+    /** Constructs a brick. */
+    constructor Brick new(int Ax, int Ay, int Awidth, int Aheight) {
+        let x = Ax;
+        let y = Ay;
+        let width = Awidth;
+        let height = Aheight;
+        let face = 0;
+        let broken = false;
+        do show();
+        return this;
+    }
+
+    /** Deallocates the object's memory. */
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    /** Shows the brick. */
+    method void show() {
+        do Screen.setColor(true);
+        do draw();
+        return;
+    }
+
+    /** Hides the brick. */
+    method void hide() {
+        do Screen.setColor(false);
+        do draw();
+        return;
+    }
+
+    /** Draws the brick. */
+    method void draw() {
+        do Screen.drawRectangle(x, y, x + width, y + height);
+        return;
+    }
+
+    /** Checks if the brick is broken. */
+    method boolean broken() {
+        return broken;
+    }
+
+    /** Determine's if brick has been hit */
+    method int hit(int ballLeft, int ballRight, int ballTop, int ballBottom) {
+        var int face;
+        let face = 0;
+
+        // Bottom edge
+        if ((((ballTop < (y + height)) & (ballBottom > (y + height))) & ((ballLeft < (x + width)) & (ballRight > x)))) {
+            let broken = true;
+            let face = 3;
+        }
+        // Top edge
+        if ((((ballTop > y) & (ballBottom < y)) & ((ballLeft < (x + width)) & (ballRight > x)))) {
+            let broken = false;
+            let face = 4;
+        }
+        // Left edge
+        if ((((ballTop < (y + height)) & (ballBottom > y)) & ((ballLeft < x) & (ballRight > x)))) {
+            let broken = true;
+            let face = 1;
+        }
+        // Right edge
+        if ((((ballTop < (y + height)) & (ballBottom > y)) & ((ballLeft < (x + width)) & (ballRight > (x + width))))) {
+            let broken = true;
+            let face = 2;
+        }
+        // Inside!
+        if ((ballTop > y) & (ballBottom < (y + height)) & (ballLeft > x) & (ballRight < (x + width))) {
+            let broken = true;
+            let face = 5;
+        }
+
+        if (broken) {
+            do hide();
+        }
+        return face;
+    }
+}

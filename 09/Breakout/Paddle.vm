@@ -10,7 +10,7 @@ push argument 2
 pop this 2
 push argument 3
 pop this 3
-push constant 0
+push constant 2
 pop this 4
 push pointer 0
 call Paddle.show 1

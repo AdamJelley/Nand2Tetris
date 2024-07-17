@@ -15,7 +15,7 @@
         let y = Ay;
         let width = Awidth;
         let height = Aheight;
-        let direction = 0;
+        let direction = 2;
         do show();
         return this;
     }
