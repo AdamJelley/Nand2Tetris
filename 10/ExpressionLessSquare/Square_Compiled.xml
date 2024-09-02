@@ -1,0 +1,34 @@
+<class>
+  <keyword> class </keyword>
+  <identifier> Square </identifier>
+  <symbol> { </symbol>
+  <classVarDec>
+    <keyword> field </keyword>
+    <keyword> int </keyword>
+    <identifier> x </identifier>
+    <symbol> , </symbol>
+    <identifier> y </identifier>
+    <symbol> ; </symbol>
+  </classVarDec>
+  <classVarDec>
+    <keyword> field </keyword>
+    <keyword> int </keyword>
+    <identifier> size </identifier>
+    <symbol> ; </symbol>
+  </classVarDec>
+  <subroutineDec>
+    <keyword> constructor </keyword>
+    <identifier> Square </identifier>
+    <identifier> new </identifier>
+    <symbol> ( </symbol>
+    <parameterList>
+      <keyword> int </keyword>
+      <identifier> ax </identifier>
+      <symbol> , </symbol>
+      <keyword> int </keyword>
+      <identifier> ay </identifier>
+      <symbol> , </symbol>
+      <keyword> int </keyword>
+      <identifier> asize </identifier>
+    </parameterList>
+    <symbol> ) </symbol>

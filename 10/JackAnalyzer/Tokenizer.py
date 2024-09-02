@@ -23,6 +23,7 @@ class Tokenizer:
                          'return',
                          ]
         self.symbols = ['{', '}', '(', ')', '[', ']', '.', ',', ';', '+', '-', '*', '/', '&', '|', '<', '>', '=', '~']
+        self.jack_filename = jack_file
         self.jack_file = open(jack_file, "r")
         self.parsed_jack_file = self._parse_jack_file()
         self.current_token = -1
@@ -72,31 +73,53 @@ class Tokenizer:
 
     def advance(self):
         self.current_token += 1
-        return self.parsed_jack_file[self.current_token]
+        raw_token = self.parsed_jack_file[self.current_token]
+        token_type = self.token_type(raw_token)
+        formatted_token = self.format_token(raw_token, token_type)
+        return formatted_token, token_type
+    
+    def view_next_token(self):
+        raw_token = self.parsed_jack_file[self.current_token + 1]
+        return raw_token
 
     def token_type(self, token):
         if token in self.keywords:
-            return 'KEYWORD'
+            return 'keyword'
         elif token in self.symbols:
-            return 'SYMBOL'
+            return 'symbol'
         elif token.isdigit():
-            return 'INT_CONST'
+            return 'integerConstant'
         elif token.startswith('"'):
             assert token.endswith('"')
-            return "STRING_CONST"
+            return "stringConstant"
         else:
-            return "IDENTIFIER"
+            return "identifier"
+
+    def format_token(self, token, token_type):
+        if token_type == "keyword":
+            formatted_token = self.keyWord(token)
+        elif token_type == "symbol":
+            formatted_token = self.symbol(token)
+        elif token_type == "integerConstant":
+            formatted_token = self.intVal(token)
+        elif token_type == "stringConstant":
+            formatted_token == self.stringVal(token)
+        elif token_type == "identifier":
+            formatted_token = self.identifier(token)
+        else:
+            raise ValueError(f"Token type {token_type} not recongised.")
+        return formatted_token
 
     def keyWord(self, token):
-        return token.upper()
+        return token
 
     def symbol(self, token):
-        if token == '<':
-            return '&lt;'
-        elif token == '>':
-            return '&gt;'
-        elif token == '&':
-            return '&amp;'
+        if token == "<":
+            return "&lt;"
+        elif token == ">":
+            return "&gt;"
+        elif token == "&":
+            return "&amp;"
         else:
             return token
 
