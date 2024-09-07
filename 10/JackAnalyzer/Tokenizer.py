@@ -81,6 +81,10 @@ class Tokenizer:
     def view_next_token(self):
         raw_token = self.parsed_jack_file[self.current_token + 1]
         return raw_token
+    
+    def view_next_next_token(self):
+        raw_token = self.parsed_jack_file[self.current_token + 2]
+        return raw_token
 
     def token_type(self, token):
         if token in self.keywords:
@@ -103,7 +107,7 @@ class Tokenizer:
         elif token_type == "integerConstant":
             formatted_token = self.intVal(token)
         elif token_type == "stringConstant":
-            formatted_token == self.stringVal(token)
+            formatted_token = self.stringVal(token)
         elif token_type == "identifier":
             formatted_token = self.identifier(token)
         else:

@@ -5,6 +5,8 @@ class CompilationEngine:
         parsed_filename = jack_filename[: jack_filename.rindex(".")] + "_Compiled.xml"
         self.parsed_file = open(parsed_filename, 'w')
         self.indent = "\n"
+        self.ops = ['+', '-', '*', '/', '&', '|', '<', '>', '=']
+        self.unary_ops = ['-', '~']
 
     def increment_indent(self):
         self.indent+="  "
@@ -301,8 +303,12 @@ class CompilationEngine:
         self.write_indent()
         self.parsed_file.write("<expression>")
         self.increment_indent()
-
         self.compileTerm()
+        while self.tokenizer.view_next_token() in self.ops:
+            token, token_type = self.tokenizer.advance()
+            # op
+            self.write_token(token, token_type)
+            self.compileTerm()
         self.decrement_indent()
         self.write_indent()
         self.parsed_file.write('</expression>')
@@ -311,9 +317,38 @@ class CompilationEngine:
         self.write_indent()
         self.parsed_file.write("<term>")
         self.increment_indent()
-        token, token_type = self.tokenizer.advance()
-        # Assume term is constant for now.
-        self.write_token(token, token_type)
+        next_token = self.tokenizer.view_next_token()
+        next_next_token = self.tokenizer.view_next_next_token()
+        if next_token in self.unary_ops:
+            token, token_type = self.tokenizer.advance()
+            # unary op
+            self.write_token(token, token_type)
+            self.compileTerm()
+        elif next_token == '(':
+            token, token_type = self.tokenizer.advance()
+            # (
+            self.write_token(token, token_type)
+            self.compileExpression()
+            token, token_type = self.tokenizer.advance()
+            # )
+            self.write_token(token, token_type)
+        elif next_next_token == '(' or next_next_token == '.':
+            self.compileSubroutineCall()
+        elif next_next_token == '[':
+            token, token_type = self.tokenizer.advance()
+            # varName
+            self.write_token(token, token_type)
+            token, token_type = self.tokenizer.advance()
+            # [
+            self.write_token(token, token_type)
+            self.compileExpression()
+            token, token_type = self.tokenizer.advance()
+            # ]
+            self.write_token(token, token_type)
+        else:
+            token, token_type = self.tokenizer.advance()
+            # Term is constant
+            self.write_token(token, token_type)
         self.decrement_indent()
         self.write_indent()
         self.parsed_file.write('</term>')
@@ -344,14 +379,11 @@ class CompilationEngine:
         self.write_indent()
         self.parsed_file.write("<expressionList>")
         self.increment_indent()
-        next_token = self.tokenizer.view_next_token()
-        while next_token != ')':
+        while self.tokenizer.view_next_token() != ')':
             self.compileExpression()
-            next_token = self.tokenizer.view_next_token()
-            if next_token == ',':
+            if self.tokenizer.view_next_token() == ",":
                 token, token_type = self.tokenizer.advance()
                 self.write_token(token, token_type)
-                next_token = self.tokenizer.view_next_token()
         self.decrement_indent()
         self.write_indent()
         self.parsed_file.write("</expressionList>")
