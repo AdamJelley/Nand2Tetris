@@ -1,6 +1,7 @@
 # Custom files
 .DS_Store
 *.zip
+*.ipynb
 
 # Python
 __pycache__/
