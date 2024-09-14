@@ -23,25 +23,3 @@ if __name__ == "__main__":
         tokenizer = Tokenizer(jack_file)
         engine = CompilationEngine(tokenizer)
         engine.compileClass()
-
-
-        # while tokenizer.hasMoreTokens():
-        #     token, token_type = tokenizer.advance()
-        #     if token_type == 'KEYWORD':
-        #         keyword = tokenizer.keyWord(token)
-        #         engine.write_token(keyword.lower(), token_type)
-        #     elif token_type == 'SYMBOL':
-        #         symbol = tokenizer.symbol(token)
-        #         engine.write_token(symbol, token_type)
-        #     elif token_type == 'IDENTIFIER':
-        #         identifier = tokenizer.identifier(token)
-        #         engine.write_token(identifier, token_type)
-        #     elif token_type == 'INT_CONST':
-        #         intval = tokenizer.intVal(token)
-        #         engine.write_token(intval, token_type)
-        #     elif token_type == "STRING_CONST":
-        #         stringval = tokenizer.stringVal(token)
-        #         engine.write_token(stringval, token_type)
-        #     else:
-        #         raise ValueError(f"Token type {token_type} not recongised.")
-        # engine.close_file()
