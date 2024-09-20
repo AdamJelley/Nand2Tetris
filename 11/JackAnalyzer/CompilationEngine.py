@@ -1,3 +1,5 @@
+from SymbolTable import SymbolTable
+
 class CompilationEngine:
     def __init__(self, tokenizer):
         self.tokenizer = tokenizer
@@ -25,6 +27,7 @@ class CompilationEngine:
         """
         Compile complete class (equivalent to file in Jack).
         """
+        self.class_symbol_table = SymbolTable()
         self.parsed_file.write("<class>")
         self.increment_indent()
         token, token_type = self.tokenizer.advance()
@@ -33,13 +36,14 @@ class CompilationEngine:
         token, token_type = self.tokenizer.advance()
         # className
         self.write_token(token, token_type)
+        class_name = token
         token, token_type = self.tokenizer.advance()
         # {
         self.write_token(token, token_type)
         while self.exists_classVarDec(self.tokenizer.view_next_token()):
             self.compileClassVarDec()
         while self.exists_subroutineDec(self.tokenizer.view_next_token()):
-            self.compileSubroutine()
+            self.compileSubroutine(class_name)
         token, token_type = self.tokenizer.advance()
         # }
         self.write_token(token, token_type)
@@ -57,27 +61,44 @@ class CompilationEngine:
         self.increment_indent()
         token, token_type = self.tokenizer.advance()
         # Static | Field
+        symbol_kind = token
         self.write_token(token, token_type)
         token, token_type = self.tokenizer.advance()
         # Type
+        symbol_type = token
         self.write_token(token, token_type)
         token, token_type = self.tokenizer.advance()
         # varName
+        symbol_name = token
         self.write_token(token, token_type)
+        self.class_symbol_table.define(symbol_name, symbol_type, symbol_kind)
+        self.write_token(self.class_symbol_table.typeOf(symbol_name), "category")
+        self.write_token(self.class_symbol_table.indexOf(symbol_name), 'index')
+        self.write_token('declared', 'usage')
         token, token_type = self.tokenizer.advance()
         # Multiple variables of same type
         while token != ';':
             self.write_token(token, token_type)
             token, token_type = self.tokenizer.advance()
+            if token != ',':
+                symbol_name = token
+                self.class_symbol_table.define(symbol_name, symbol_type, symbol_kind)
+                self.write_token(
+                    self.class_symbol_table.typeOf(symbol_name), "category"
+                )
+                self.write_token(self.class_symbol_table.indexOf(symbol_name), "index")
+                self.write_token("declared", "usage")
         self.write_token(token, token_type)
         self.decrement_indent()
         self.write_indent()
         self.parsed_file.write('</classVarDec>')
 
-    def compileSubroutine(self):
+    def compileSubroutine(self, class_name):
         """
         Compile class subroutines.
         """
+        self.method_symbol_table = SymbolTable()
+        self.method_symbol_table.define('this', class_name, 'argument')
         self.write_indent()
         self.parsed_file.write('<subroutineDec>')
         self.increment_indent()
@@ -107,8 +128,21 @@ class CompilationEngine:
         self.parsed_file.write('<parameterList>')
         self.increment_indent()
         while self.tokenizer.view_next_token() != ')':
+            # Type
             token, token_type = self.tokenizer.advance()
             self.write_token(token, token_type)
+            symbol_type = token
+            # Variable
+            token, token_type = self.tokenizer.advance()
+            self.write_token(token, token_type)
+            symbol_name = token
+            self.method_symbol_table.define(symbol_name, symbol_type, 'argument')
+            self.write_token(self.method_symbol_table.typeOf(symbol_name), "category")
+            self.write_token(self.method_symbol_table.indexOf(symbol_name), 'index')
+            self.write_token('declared', 'usage')
+            if self.tokenizer.view_next_token() == ',':
+                token, token_type = self.tokenizer.advance()
+                self.write_token(token, token_type)
         self.decrement_indent()
         self.write_indent()
         self.parsed_file.write('</parameterList>')
@@ -140,13 +174,24 @@ class CompilationEngine:
         token, token_type = self.tokenizer.advance()
         # type
         self.write_token(token, token_type)
+        symbol_type = token
         token, token_type = self.tokenizer.advance()
         # varName
         self.write_token(token, token_type)
+        symbol_name = token
+        self.method_symbol_table.define(symbol_name, symbol_type, 'local')
+        self.write_token(self.method_symbol_table.typeOf(symbol_name), "category")
+        self.write_token(self.method_symbol_table.indexOf(symbol_name), 'index')
+        self.write_token('declared', 'usage')
         token, token_type = self.tokenizer.advance()
         # Multiple variables of same type
         while token != ";":
             self.write_token(token, token_type)
+            symbol_name = token
+            self.method_symbol_table.define(symbol_name, symbol_type, 'local')
+            self.write_token(self.method_symbol_table.typeOf(symbol_name), "category")
+            self.write_token(self.method_symbol_table.indexOf(symbol_name), 'index')
+            self.write_token('declared', 'usage')
             token, token_type = self.tokenizer.advance()
         # ;
         self.write_token(token, token_type)
@@ -189,6 +234,8 @@ class CompilationEngine:
         token, token_type = self.tokenizer.advance()
         # varName
         self.write_token(token, token_type)
+        if token_type == 'identifier':
+            self.write_identifier_info(token)
         token, token_type = self.tokenizer.advance()
         if token == '[':
             self.write_token(token, token_type)
@@ -338,6 +385,8 @@ class CompilationEngine:
             token, token_type = self.tokenizer.advance()
             # varName
             self.write_token(token, token_type)
+            if token_type == 'identifier':
+                self.write_identifier_info(token)
             token, token_type = self.tokenizer.advance()
             # [
             self.write_token(token, token_type)
@@ -349,6 +398,8 @@ class CompilationEngine:
             token, token_type = self.tokenizer.advance()
             # Term is constant
             self.write_token(token, token_type)
+            if token_type == 'identifier':
+                self.write_identifier_info(token)
         self.decrement_indent()
         self.write_indent()
         self.parsed_file.write('</term>')
@@ -405,3 +456,15 @@ class CompilationEngine:
             return True
         else:
             return False
+
+    def write_identifier_info(self, token):
+        if self.method_symbol_table.indexOf(token) is not None:
+            self.write_token(self.method_symbol_table.typeOf(token), "category")
+            self.write_token(self.method_symbol_table.indexOf(token), "index")
+            self.write_token("used", "usage")
+        elif self.class_symbol_table.indexOf(token) is not None:
+            self.write_token(self.class_symbol_table.typeOf(token), "category")
+            self.write_token(self.class_symbol_table.indexOf(token), "index")
+            self.write_token("used", "usage")
+        else:
+            raise ValueError(f"Identifier {token} used before it is declared.")
