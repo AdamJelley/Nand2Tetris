@@ -1,6 +1,9 @@
 class SymbolTable:
     def __init__(self):
         self.reset()
+        
+    def __repr__(self):
+        return str(self.symbol_table)
 
     def reset(self):
         self.symbol_table = []
