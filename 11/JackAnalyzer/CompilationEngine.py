@@ -103,13 +103,15 @@ class CompilationEngine:
         Compile class subroutines.
         """
         self.method_symbol_table = SymbolTable()
-        self.method_symbol_table.define('this', class_name, 'argument')
         # self.write_indent()
         # self.parsed_file.write('<subroutineDec>')
         # self.increment_indent()
         token, token_type = self.tokenizer.advance()
         # Constructor | Function | Method
         # self.write_token(token, token_type)
+        subroutine_type = token
+        if subroutine_type == 'method':
+            self.method_symbol_table.define('this', class_name, 'argument')
         token, token_type = self.tokenizer.advance()
         # Return type
         # self.write_token(token, token_type)
@@ -133,7 +135,15 @@ class CompilationEngine:
         while self.exists_varDec(self.tokenizer.view_next_token()):
             self.compileVarDec()
         n_locals = self.method_symbol_table.varCount('local')
+        n_args = self.method_symbol_table.varCount('argument')
         self.vm_writer.writeFunction(class_name, subroutine_name, n_locals)
+        if subroutine_type == 'constructor':
+            self.vm_writer.writePush('constant', n_args)
+            self.vm_writer.writeCall('Memory.alloc', 1)
+            self.vm_writer.writePop('pointer', 0)
+        elif subroutine_type == 'method':
+            self.vm_writer.writePush('argument', 0)
+            self.vm_writer.writePop('pointer', 0)
         self.compileSubroutineBody()
         # self.decrement_indent()
         # self.write_indent()
@@ -195,8 +205,9 @@ class CompilationEngine:
         # Multiple variables of same type
         while token != ";":
             # self.write_token(token, token_type)
-            symbol_name = token
-            self.method_symbol_table.define(symbol_name, symbol_type, 'local')
+            if token != ',':
+                symbol_name = token
+                self.method_symbol_table.define(symbol_name, symbol_type, 'local')
             # self.write_token(self.method_symbol_table.typeOf(symbol_name), "category")
             # self.write_token(self.method_symbol_table.indexOf(symbol_name), 'index')
             # self.write_token('declared', 'usage')
@@ -241,17 +252,17 @@ class CompilationEngine:
         # self.write_token(token, token_type)
         token, token_type = self.tokenizer.advance()
         # varName
-        self.write_token(token, token_type)
+        # self.write_token(token, token_type)
         # if token_type == 'identifier':
         #     self.write_identifier_info(token)
         dtype, segment, index = self.get_identifier_info(token)
         token, token_type = self.tokenizer.advance()
         if token == '[':
-            self.write_token(token, token_type)
+            # self.write_token(token, token_type)
             self.compileExpression()
             token, token_type = self.tokenizer.advance()
             # ]
-            self.write_token(token, token_type)
+            # self.write_token(token, token_type)
             token, token_type = self.tokenizer.advance()
         # =
         # self.write_token(token, token_type)
@@ -265,93 +276,95 @@ class CompilationEngine:
         # self.parsed_file.write("</letStatement>")
 
     def compileIf(self):
-        #self.write_indent()
-        #self.parsed_file.write("<ifStatement>")
-        #self.increment_indent()
+        # self.write_indent()
+        # self.parsed_file.write("<ifStatement>")
+        # self.increment_indent()
+        if_count = self.if_number
+        self.if_number += 1
         token, token_type = self.tokenizer.advance()
         # if
-        #self.write_token(token, token_type)
+        # self.write_token(token, token_type)
         token, token_type = self.tokenizer.advance()
         # (
-        #self.write_token(token, token_type)
+        # self.write_token(token, token_type)
         self.compileExpression()
         token, token_type = self.tokenizer.advance()
         # )
-        #self.write_token(token, token_type)
+        # self.write_token(token, token_type)
         self.vm_writer.writeArithmetic('not')
-        self.vm_writer.writeIf(f"IF_FALSE{self.if_number}")
+        self.vm_writer.writeIf(f"IF_FALSE{if_count}")
         token, token_type = self.tokenizer.advance()
         # {
-        #self.write_token(token, token_type)
+        # self.write_token(token, token_type)
         self.compileStatements()
         token, token_type = self.tokenizer.advance()
         # }
-        #self.write_token(token, token_type)
-        self.vm_writer.writeGoto(f"IF_TRUE{self.if_number}")
+        # self.write_token(token, token_type)
+        self.vm_writer.writeGoto(f"IF_TRUE{if_count}")
         next_token = self.tokenizer.view_next_token()
-        self.vm_writer.writeLabel(f"IF_FALSE{self.if_number}")
+        self.vm_writer.writeLabel(f"IF_FALSE{if_count}")
         if next_token == 'else':
             token, token_type = self.tokenizer.advance()
-            #self.write_token(token, token_type)
+            # self.write_token(token, token_type)
             token, token_type = self.tokenizer.advance()
             # {
-            #self.write_token(token, token_type)
+            # self.write_token(token, token_type)
             self.compileStatements()
             token, token_type = self.tokenizer.advance()
             # }
-            #self.write_token(token, token_type)
-        self.vm_writer.writeLabel(f"IF_TRUE{self.if_number}")
-        #self.decrement_indent()
-        #self.write_indent()
-        #self.parsed_file.write("</ifStatement>")
-        self.if_number += 1
+            # self.write_token(token, token_type)
+        self.vm_writer.writeLabel(f"IF_TRUE{if_count}")
+        # self.decrement_indent()
+        # self.write_indent()
+        # self.parsed_file.write("</ifStatement>")
 
     def compileWhile(self):
-        #self.write_indent()
-        #self.parsed_file.write("<whileStatement>")
-        #self.increment_indent()
+        # self.write_indent()
+        # self.parsed_file.write("<whileStatement>")
+        # self.increment_indent()
+        while_count = self.while_number
+        self.while_number += 1
         token, token_type = self.tokenizer.advance()
         # while
-        self.vm_writer.writeLabel(f"WHILE_EXP{self.while_number}")
-        #self.write_token(token, token_type)
+        self.vm_writer.writeLabel(f"WHILE_EXP{while_count}")
+        # self.write_token(token, token_type)
         token, token_type = self.tokenizer.advance()
         # (
-        #self.write_token(token, token_type)
+        # self.write_token(token, token_type)
         self.compileExpression()
         token, token_type = self.tokenizer.advance()
         # )
-        #self.write_token(token, token_type)
+        # self.write_token(token, token_type)
         self.vm_writer.writeArithmetic('not')
-        self.vm_writer.writeIf(f"WHILE_END{self.while_number}")
+        self.vm_writer.writeIf(f"WHILE_END{while_count}")
         token, token_type = self.tokenizer.advance()
         # {
-        #self.write_token(token, token_type)
+        # self.write_token(token, token_type)
         self.compileStatements()
         token, token_type = self.tokenizer.advance()
         # }
-        #self.write_token(token, token_type)
-        self.vm_writer.writeGoto(f"WHILE_EXP{self.while_number}")
-        self.vm_writer.writeLabel(f"WHILE_END{self.while_number}")
-        #self.decrement_indent()
-        #self.write_indent()
-        #self.parsed_file.write("</whileStatement>")
-        self.while_number += 1
+        # self.write_token(token, token_type)
+        self.vm_writer.writeGoto(f"WHILE_EXP{while_count}")
+        self.vm_writer.writeLabel(f"WHILE_END{while_count}")
+        # self.decrement_indent()
+        # self.write_indent()
+        # self.parsed_file.write("</whileStatement>")
 
     def compileDo(self):
-        #self.write_indent()
-        #self.parsed_file.write("<doStatement>")
-        #self.increment_indent()
+        # self.write_indent()
+        # self.parsed_file.write("<doStatement>")
+        # self.increment_indent()
         token, token_type = self.tokenizer.advance()
         # do
-        #self.write_token(token, token_type)
+        # self.write_token(token, token_type)
         self.compileSubroutineCall()
         token, token_type = self.tokenizer.advance()
         # ;
-        #self.write_token(token, token_type)
+        # self.write_token(token, token_type)
         self.vm_writer.writePop('temp', 0)
-        #self.decrement_indent()
-        #self.write_indent()
-        #self.parsed_file.write("</doStatement>")
+        # self.decrement_indent()
+        # self.write_indent()
+        # self.parsed_file.write("</doStatement>")
 
     def compileReturn(self):
         # self.write_indent()
@@ -360,10 +373,12 @@ class CompilationEngine:
         token, token_type = self.tokenizer.advance()
         # return
         # self.write_token(token, token_type)
-        if self.tokenizer.view_next_token() != ';':
-            self.compileExpression()
-        else:
+        if self.tokenizer.view_next_token() == ';':
             self.vm_writer.writePush('constant', 0)
+        elif self.tokenizer.view_next_token() == 'this':
+            self.vm_writer.writePush('pointer', 0)
+        else:
+            self.compileExpression()
         token, token_type = self.tokenizer.advance()
         # ;
         # self.write_token(token, token_type)
@@ -440,6 +455,14 @@ class CompilationEngine:
                 self.vm_writer.writePush(segment, index)
             elif token_type == 'integerConstant':
                 self.vm_writer.writePush('constant', token)
+            elif token_type == 'keyword':
+                if token == 'true':
+                    self.vm_writer.writePush('constant', 1)
+                    self.vm_writer.writeArithmetic('-', unary=True)
+                elif token == 'false' or token == 'null':
+                    self.vm_writer.writePush('constant', 0)
+                elif token == 'this':
+                    self.vm_writer.writePush('pointer', 0)
             else:
                 raise ValueError(f"Token type {token_type} for token {token} not handled.")
         # self.decrement_indent()
@@ -455,13 +478,16 @@ class CompilationEngine:
         # subroutineName | className | varName
         # self.write_token(token, token_type)
         subroutine_name = token
+        object_name = None
         token, token_type = self.tokenizer.advance()
         if token == '.':
+            object_name = subroutine_name
             # self.write_token(token, token_type)
             token, token_type = self.tokenizer.advance()
             # subroutineName
             # self.write_token(token, token_type)
-            subroutine_name = f"{subroutine_name}.{token}"
+            method_name = token
+            subroutine_name = f"{object_name}.{method_name}"
             token, token_type = self.tokenizer.advance()
         # (
         # self.write_token(token, token_type)

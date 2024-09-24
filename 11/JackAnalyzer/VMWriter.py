@@ -18,11 +18,11 @@ class VMWriter:
             self.file.write("neg\n")
         elif op == '=':
             self.file.write("eq\n")
-        elif op == '>' or op == 'gt':
+        elif op == '>' or op == '&gt;' or op == 'gt':
             self.file.write("gt\n")
-        elif op == '<' or op == 'lt':
+        elif op == '<' or op == '&lt;' or op == 'lt':
             self.file.write("lt\n")
-        elif op == '&' or op == 'and':
+        elif op == '&' or op == '&amp;' or op == 'and':
             self.file.write("and\n")
         elif op == '|' or op == 'or':
             self.file.write("or\n")
@@ -32,13 +32,13 @@ class VMWriter:
             raise ValueError(f"Operator {op} not recognised.")
 
     def writeLabel(self, label):
-        self.file.write(f"label {label}")
+        self.file.write(f"label {label}\n")
 
     def writeGoto(self, label):
-        self.file.write(f"goto {label}")
+        self.file.write(f"goto {label}\n")
 
     def writeIf(self, label):
-        self.file.write(f"if-goto {label}")
+        self.file.write(f"if-goto {label}\n")
 
     def writeCall(self, name, n_args):
         self.file.write(f"call {name} {n_args}\n")
@@ -47,7 +47,7 @@ class VMWriter:
         self.file.write(f"function {class_name}.{subroutine_name} {n_vars}\n")
 
     def writeReturn(self):
-        self.file.write("return")
+        self.file.write("return\n")
 
     def close(self):
         self.file.close()
