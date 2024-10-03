@@ -1,50 +1,11 @@
 function Main.main 1
-<statements>
-  <letStatement>
-    <keyword> let </keyword>
-    <identifier> game </identifier>
-    <category> SquareGame </category>
-    <index> 0 </index>
-    <usage> used </usage>
-    <symbol> = </symbol>
-    <expression>
-      <term>
-        <identifier> SquareGame </identifier>
-        <symbol> . </symbol>
-        <identifier> new </identifier>
-        <symbol> ( </symbol>
-        <expressionList>
-        </expressionList>
-        <symbol> ) </symbol>
-      </term>
-    </expression>
-    <symbol> ; </symbol>
-  </letStatement>
-  <doStatement>
-    <keyword> do </keyword>
-    <identifier> game </identifier>
-    <symbol> . </symbol>
-    <identifier> run </identifier>
-    <symbol> ( </symbol>
-    <expressionList>
-    </expressionList>
-    <symbol> ) </symbol>
-    <symbol> ; </symbol>
-  </doStatement>
-  <doStatement>
-    <keyword> do </keyword>
-    <identifier> game </identifier>
-    <symbol> . </symbol>
-    <identifier> dispose </identifier>
-    <symbol> ( </symbol>
-    <expressionList>
-    </expressionList>
-    <symbol> ) </symbol>
-    <symbol> ; </symbol>
-  </doStatement>
-  <returnStatement>
-    <keyword> return </keyword>
-    <symbol> ; </symbol>
-  </returnStatement>
-</statements>
-<symbol> } </symbol></subroutineBody>
+call SquareGame.new 0
+pop local 0
+push local 0
+call SquareGame.run 1
+pop temp 0
+push local 0
+call SquareGame.dispose 1
+pop temp 0
+push constant 0
+return

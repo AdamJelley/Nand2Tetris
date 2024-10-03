@@ -40,14 +40,14 @@ class CompilationEngine:
         token, token_type = self.tokenizer.advance()
         # className
         # self.write_token(token, token_type)
-        class_name = token
+        self.class_name = token
         token, token_type = self.tokenizer.advance()
         # {
         # self.write_token(token, token_type)
         while self.exists_classVarDec(self.tokenizer.view_next_token()):
             self.compileClassVarDec()
         while self.exists_subroutineDec(self.tokenizer.view_next_token()):
-            self.compileSubroutine(class_name)
+            self.compileSubroutine()
         token, token_type = self.tokenizer.advance()
         # }
         assert token == '}'
@@ -84,21 +84,21 @@ class CompilationEngine:
         # Multiple variables of same type
         while token != ';':
             # self.write_token(token, token_type)
-            token, token_type = self.tokenizer.advance()
             if token != ',':
                 symbol_name = token
                 self.class_symbol_table.define(symbol_name, symbol_type, symbol_kind)
-                # self.write_token(
-                #     self.class_symbol_table.typeOf(symbol_name), "category"
-                # )
-                # self.write_token(self.class_symbol_table.indexOf(symbol_name), "index")
-                # self.write_token("declared", "usage")
+            token, token_type = self.tokenizer.advance()
+            # self.write_token(
+            #     self.class_symbol_table.typeOf(symbol_name), "category"
+            # )
+            # self.write_token(self.class_symbol_table.indexOf(symbol_name), "index")
+            # self.write_token("declared", "usage")
         # self.write_token(token, token_type)
         # self.decrement_indent()
         # self.write_indent()
         # self.parsed_file.write('</classVarDec>')
 
-    def compileSubroutine(self, class_name):
+    def compileSubroutine(self):
         """
         Compile class subroutines.
         """
@@ -111,7 +111,7 @@ class CompilationEngine:
         # self.write_token(token, token_type)
         subroutine_type = token
         if subroutine_type == 'method':
-            self.method_symbol_table.define('this', class_name, 'argument')
+            self.method_symbol_table.define('this', self.class_name, 'argument')
         token, token_type = self.tokenizer.advance()
         # Return type
         # self.write_token(token, token_type)
@@ -135,10 +135,10 @@ class CompilationEngine:
         while self.exists_varDec(self.tokenizer.view_next_token()):
             self.compileVarDec()
         n_locals = self.method_symbol_table.varCount('local')
-        n_args = self.method_symbol_table.varCount('argument')
-        self.vm_writer.writeFunction(class_name, subroutine_name, n_locals)
+        n_vars = self.class_symbol_table.varCount('field')
+        self.vm_writer.writeFunction(self.class_name, subroutine_name, n_locals)
         if subroutine_type == 'constructor':
-            self.vm_writer.writePush('constant', n_args)
+            self.vm_writer.writePush('constant', n_vars)
             self.vm_writer.writeCall('Memory.alloc', 1)
             self.vm_writer.writePop('pointer', 0)
         elif subroutine_type == 'method':
@@ -256,6 +256,7 @@ class CompilationEngine:
         # if token_type == 'identifier':
         #     self.write_identifier_info(token)
         dtype, segment, index = self.get_identifier_info(token)
+        assert dtype is not None, f"Identifier {token} used before it is declared."
         token, token_type = self.tokenizer.advance()
         if token == '[':
             # self.write_token(token, token_type)
@@ -377,6 +378,7 @@ class CompilationEngine:
             self.vm_writer.writePush('constant', 0)
         elif self.tokenizer.view_next_token() == 'this':
             self.vm_writer.writePush('pointer', 0)
+            token, token_type = self.tokenizer.advance()
         else:
             self.compileExpression()
         token, token_type = self.tokenizer.advance()
@@ -452,6 +454,7 @@ class CompilationEngine:
             #     self.write_identifier_info(token)
             if token_type == 'identifier':
                 dtype, segment, index = self.get_identifier_info(token)
+                assert dtype is not None, f"Identifier {token} used before it is declared."
                 self.vm_writer.writePush(segment, index)
             elif token_type == 'integerConstant':
                 self.vm_writer.writePush('constant', token)
@@ -478,20 +481,32 @@ class CompilationEngine:
         # subroutineName | className | varName
         # self.write_token(token, token_type)
         subroutine_name = token
-        object_name = None
         token, token_type = self.tokenizer.advance()
         if token == '.':
-            object_name = subroutine_name
+            class_object_name = subroutine_name
             # self.write_token(token, token_type)
             token, token_type = self.tokenizer.advance()
             # subroutineName
             # self.write_token(token, token_type)
             method_name = token
-            subroutine_name = f"{object_name}.{method_name}"
+            dtype, segment, index = self.get_identifier_info(class_object_name)
+            if index is not None:
+                method_call = True
+                self.vm_writer.writePush(segment, index)
+                subroutine_name = f"{dtype}.{method_name}"
+            else:
+                method_call = False
+                subroutine_name = f"{class_object_name}.{method_name}"
             token, token_type = self.tokenizer.advance()
+        else:
+            method_call = True
+            self.vm_writer.writePush('pointer', 0)
+            subroutine_name = f"{self.class_name}.{subroutine_name}"
         # (
         # self.write_token(token, token_type)
         num_expressions = self.compileExpressionList()
+        if method_call:
+            num_expressions += 1
         token, token_type = self.tokenizer.advance()
         # )
         # self.write_token(token, token_type)
@@ -541,7 +556,7 @@ class CompilationEngine:
             kind = self.class_symbol_table.kindOf(token)
             index = self.class_symbol_table.indexOf(token)
         else:
-            raise ValueError(f"Identifier {token} used before it is declared.")
+            dtype, kind, index = None, None, None
 
         if kind == 'field':
             segment = 'this'
