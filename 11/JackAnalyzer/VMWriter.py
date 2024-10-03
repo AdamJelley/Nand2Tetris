@@ -31,6 +31,13 @@ class VMWriter:
         else:
             raise ValueError(f"Operator {op} not recognised.")
 
+    def writeString(self, string):
+        self.writePush('constant', len(string))
+        self.writeCall('String.new', 1)
+        for char in string:
+            self.writePush('constant', ord(char))
+            self.writeCall('String.appendChar', 2)
+
     def writeLabel(self, label):
         self.file.write(f"label {label}\n")
 

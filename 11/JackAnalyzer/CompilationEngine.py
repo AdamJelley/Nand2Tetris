@@ -259,19 +259,30 @@ class CompilationEngine:
         assert dtype is not None, f"Identifier {token} used before it is declared."
         token, token_type = self.tokenizer.advance()
         if token == '[':
+            array_term = True
+            self.vm_writer.writePush(segment, index)
             # self.write_token(token, token_type)
             self.compileExpression()
             token, token_type = self.tokenizer.advance()
             # ]
             # self.write_token(token, token_type)
+            self.vm_writer.writeArithmetic('+')
             token, token_type = self.tokenizer.advance()
+        else:
+            array_term = False
         # =
         # self.write_token(token, token_type)
         self.compileExpression()
+        if array_term:
+            self.vm_writer.writePop("temp", 0)
+            self.vm_writer.writePop("pointer", 1)
+            self.vm_writer.writePush("temp", 0)
+            self.vm_writer.writePop("that", 0)
+        else:
+            self.vm_writer.writePop(segment, index)
         token, token_type = self.tokenizer.advance()
         # ;
         # self.write_token(token, token_type)
-        self.vm_writer.writePop(segment, index)
         # self.decrement_indent()
         # self.write_indent()
         # self.parsed_file.write("</letStatement>")
@@ -437,15 +448,21 @@ class CompilationEngine:
             token, token_type = self.tokenizer.advance()
             # varName
             # self.write_token(token, token_type)
-            if token_type == 'identifier':
-                self.write_identifier_info(token)
+            dtype, segment, index = self.get_identifier_info(token)
+            assert dtype is not None, f"Identifier {token} used before it is declared."
+            self.vm_writer.writePush(segment, index)
+            # if token_type == 'identifier':
+            #     self.write_identifier_info(token)
             token, token_type = self.tokenizer.advance()
             # [
-            self.write_token(token, token_type)
+            # self.write_token(token, token_type)
             self.compileExpression()
             token, token_type = self.tokenizer.advance()
             # ]
-            self.write_token(token, token_type)
+            # self.write_token(token, token_type)
+            self.vm_writer.writeArithmetic('+')
+            self.vm_writer.writePop('pointer', 1)
+            self.vm_writer.writePush('that', 0)
         else:
             token, token_type = self.tokenizer.advance()
             # Term is constant
@@ -458,6 +475,8 @@ class CompilationEngine:
                 self.vm_writer.writePush(segment, index)
             elif token_type == 'integerConstant':
                 self.vm_writer.writePush('constant', token)
+            elif token_type == 'stringConstant':
+                self.vm_writer.writeString(token)
             elif token_type == 'keyword':
                 if token == 'true':
                     self.vm_writer.writePush('constant', 1)
@@ -476,6 +495,7 @@ class CompilationEngine:
         """
         Compile subroutine call.
         Note: Ignoring advice from lectures to include subroutine calls as if they were expressions, since subroutine calls do not appear to include <expression> and <term> tags in provided xml files.
+        subroutineName '(' expressionList ')' | (className | varName) '.' subroutineName '(' expressionList ')'
         """
         token, token_type = self.tokenizer.advance()
         # subroutineName | className | varName
@@ -491,15 +511,15 @@ class CompilationEngine:
             method_name = token
             dtype, segment, index = self.get_identifier_info(class_object_name)
             if index is not None:
-                method_call = True
+                method_call = True # class_object_name is varName -> method call
                 self.vm_writer.writePush(segment, index)
                 subroutine_name = f"{dtype}.{method_name}"
             else:
-                method_call = False
+                method_call = False # class_object_name is className -> function/constructor call
                 subroutine_name = f"{class_object_name}.{method_name}"
             token, token_type = self.tokenizer.advance()
         else:
-            method_call = True
+            method_call = True # subroutine_name only -> local method call
             self.vm_writer.writePush('pointer', 0)
             subroutine_name = f"{self.class_name}.{subroutine_name}"
         # (
