@@ -1,27 +1,10 @@
 class Tokenizer:
     def __init__(self, jack_file):
-        self.keywords = ['class',
-                         'constructor',
-                         'function',
-                         'method',
-                         'field',
-                         'static',
-                         'var',
-                         'int',
-                         'char',
-                         'boolean',
-                         'void',
-                         'true',
-                         'false',
-                         'null',
-                         'this',
-                         'let',
-                         'do',
-                         'if',
-                         'else',
-                         'while',
-                         'return',
-                         ]
+        self.keywords = [
+                            'class', 'constructor', 'function', 'method', 'field', 'static', 'var', 'int',
+                            'char', 'boolean', 'void', 'true', 'false', 'null', 'this', 'let', 'do', 'if',
+                            'else', 'while', 'return'
+                        ]
         self.symbols = ['{', '}', '(', ')', '[', ']', '.', ',', ';', '+', '-', '*', '/', '&', '|', '<', '>', '=', '~']
         self.jack_filename = jack_file
         self.jack_file = open(jack_file, "r")
