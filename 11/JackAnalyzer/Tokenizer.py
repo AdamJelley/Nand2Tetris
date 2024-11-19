@@ -31,8 +31,11 @@ class Tokenizer:
                 continue
             else:
                 parsed_next_line = ''
+                inside_quotes = False
                 for i, char in enumerate(next_line):
-                    if char in self.symbols:
+                    if char == "\"":
+                        inside_quotes = not inside_quotes
+                    if char in self.symbols and not inside_quotes:
                         parsed_next_line += ' ' + next_line[i] + ' '
                     else:
                         parsed_next_line += next_line[i]
@@ -60,11 +63,11 @@ class Tokenizer:
         token_type = self.token_type(raw_token)
         formatted_token = self.format_token(raw_token, token_type)
         return formatted_token, token_type
-    
+
     def view_next_token(self):
         raw_token = self.parsed_jack_file[self.current_token + 1]
         return raw_token
-    
+
     def view_next_next_token(self):
         raw_token = self.parsed_jack_file[self.current_token + 2]
         return raw_token
