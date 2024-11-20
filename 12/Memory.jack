@@ -42,12 +42,16 @@ class Memory {
     function int alloc(int size) {
         var Array block, newBlock;
 
+        if ( ~(size > 0) ) {
+            do Sys.error(5); // allocated memory size must be positive
+        }
+
         let block = freeList;
 
         while ( size > block[length] ) {
             let block = block[next];
             if ( block = null ) {
-                do sys.error(6);
+                do Sys.error(6);
             }
         }
 

@@ -183,6 +183,9 @@ class Output {
     /** Moves the cursor to the j-th column of the i-th row,
      *  and erases the character displayed there. */
     function void moveCursor(int i, int j) {
+        if ( (j < 0) | (j > 63) | (i < 0) | (i > 22) ) {
+            do Sys.error(20); // illegal cursor location
+        }
         let cursorX = j;
         let cursorY = i;
         return;

@@ -17,9 +17,13 @@ class String {
     /** constructs a new empty string with a maximum length of maxLength
      *  and initial length of 0. */
     constructor String new(int maxLength) {
+        if ( maxLength < 0 ) {
+            do Sys.error(14); // maximum length must be non-negative
+        }
         if ( maxLength = 0 ) {
             let maxLength = 1; // Support construction of a string with zero size.
         }
+
         let str = Array.new(maxLength);
         let length = 0;
         let maxLen = maxLength;
@@ -39,11 +43,17 @@ class String {
 
     /** Returns the character at the j-th location of this string. */
     method char charAt(int j) {
+        if ( (j < 0) | ~(j < maxLen) ) {
+            do Sys.error(15); // string index out of bounds
+        }
         return str[j];
     }
 
     /** Sets the character at the j-th location of this string to c. */
     method void setCharAt(int j, char c) {
+        if ( (j < 0) | ~(j < maxLen) ) {
+            do Sys.error(16); // string index out of bounds
+        }
         let str[j] = c;
         return;
     }
@@ -55,7 +65,7 @@ class String {
             let length = length + 1;
         }
         else {
-            do sys.error(17); // string is full
+            do Sys.error(17); // string is full
         }
         return this;
     }
@@ -67,7 +77,7 @@ class String {
             let str[length] = 0;
         }
         else {
-            do sys.error(18); // string is empty
+            do Sys.error(18); // string is empty
         }
         return;
     }
@@ -148,6 +158,9 @@ class String {
         }
         else {
             do setPositiveInt(val/10);
+            if ( length = maxLen ) {
+                do Sys.error(19); // insufficient string capacity
+            }
             do appendChar(c);
         }
         return;

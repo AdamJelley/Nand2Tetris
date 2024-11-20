@@ -62,6 +62,10 @@ class Math {
     function int divide(int x, int y) {
          var int q, nx, ny, negx, negy, sgn;
 
+         if ( y = 0 ) {
+            do Sys.error(3); // division by zero
+         }
+
         // Calculate sign
         let nx = Math.abs(x);
         let ny = Math.abs(y);
@@ -89,6 +93,10 @@ class Math {
     */
     function int sqrt(int x) {
         var int i, y, check, square;
+
+        if ( x < 0 ) {
+            do Sys.error(4); // cannot compute the square root of a negative number
+        }
 
         let y = 0;
         let i = n/2 - 1;

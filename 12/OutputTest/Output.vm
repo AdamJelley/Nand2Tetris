@@ -1484,6 +1484,29 @@ push that 0
 return
 function Output.moveCursor 0
 push argument 1
+push constant 0
+lt
+push argument 1
+push constant 63
+gt
+or
+push argument 0
+push constant 0
+lt
+or
+push argument 0
+push constant 22
+gt
+or
+not
+if-goto IF_FALSE1
+push constant 20
+call Sys.error 1
+pop temp 0
+goto IF_TRUE1
+label IF_FALSE1
+label IF_TRUE1
+push argument 1
 pop static 2
 push argument 0
 pop static 3
@@ -1525,7 +1548,7 @@ push that 0
 pop local 3
 push local 4
 not
-if-goto IF_FALSE1
+if-goto IF_FALSE2
 push static 1
 push local 1
 add
@@ -1544,8 +1567,8 @@ pop temp 0
 pop pointer 1
 push temp 0
 pop that 0
-goto IF_TRUE1
-label IF_FALSE1
+goto IF_TRUE2
+label IF_FALSE2
 push static 1
 push local 1
 add
@@ -1563,7 +1586,7 @@ pop temp 0
 pop pointer 1
 push temp 0
 pop that 0
-label IF_TRUE1
+label IF_TRUE2
 push local 1
 push constant 32
 add
@@ -1578,18 +1601,18 @@ push static 2
 push constant 63
 eq
 not
-if-goto IF_FALSE2
+if-goto IF_FALSE3
 call Output.println 0
 pop temp 0
-goto IF_TRUE2
-label IF_FALSE2
+goto IF_TRUE3
+label IF_FALSE3
 push static 3
 push static 2
 push constant 1
 add
 call Output.moveCursor 2
 pop temp 0
-label IF_TRUE2
+label IF_TRUE3
 push constant 0
 return
 function Output.printString 1
@@ -1636,20 +1659,20 @@ push static 3
 push constant 22
 eq
 not
-if-goto IF_FALSE3
+if-goto IF_FALSE4
 push constant 0
 push constant 0
 call Output.moveCursor 2
 pop temp 0
-goto IF_TRUE3
-label IF_FALSE3
+goto IF_TRUE4
+label IF_FALSE4
 push static 3
 push constant 1
 add
 push constant 0
 call Output.moveCursor 2
 pop temp 0
-label IF_TRUE3
+label IF_TRUE4
 push constant 0
 return
 function Output.backSpace 0
@@ -1657,13 +1680,13 @@ push static 2
 push constant 0
 eq
 not
-if-goto IF_FALSE4
+if-goto IF_FALSE5
 push static 3
 push constant 0
 eq
 not
 not
-if-goto IF_FALSE5
+if-goto IF_FALSE6
 push static 3
 push constant 1
 sub
@@ -1679,11 +1702,11 @@ sub
 push constant 63
 call Output.moveCursor 2
 pop temp 0
+goto IF_TRUE6
+label IF_FALSE6
+label IF_TRUE6
 goto IF_TRUE5
 label IF_FALSE5
-label IF_TRUE5
-goto IF_TRUE4
-label IF_FALSE4
 push static 3
 push static 2
 push constant 1
@@ -1699,6 +1722,6 @@ push constant 1
 sub
 call Output.moveCursor 2
 pop temp 0
-label IF_TRUE4
+label IF_TRUE5
 push constant 0
 return

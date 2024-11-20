@@ -59,6 +59,10 @@ class Screen {
     function void drawPixel(int x, int y) {
         var int address, bit, mask;
 
+        if ( (x < 0 ) | (x > 511) | (y < 0) | (y > 255) ) {
+            do Sys.error(7); // illegal pixel coordinates
+        }
+
         let address = (32 * y) + (x / 16);
         let bit = x - ((x/16)*16);
         let mask = powersOfTwo[bit];
@@ -76,6 +80,10 @@ class Screen {
     function void drawLine(int x1, int y1, int x2, int y2) {
         var int dx, dy, x, y, a, b, diff;
         var boolean up;
+
+        if ( (x1 < 0 ) | (x1 > 511) | (y1 < 0) | (y1 > 255) | (x2 < 0 ) | (x2 > 511) | (y2 < 0) | (y2 > 255) ) {
+            do Sys.error(8); // illegal line coordinates
+        }
 
         if ( x2 > x1 ) {
             let dx = x2 - x1;
@@ -195,6 +203,10 @@ class Screen {
     function void drawRectangle(int x1, int y1, int x2, int y2) {
         var int dx, dy, x, y, a;
 
+        if ( (x1 < 0 ) | (x1 > 511) | (y1 < 0) | (y1 > 255) | (x2 < 0 ) | (x2 > 511) | (y2 < 0) | (y2 > 255) ) {
+            do Sys.error(9); // illegal rectangle coordinates
+        }
+
         if ( x1 < x2 ) {
             let dx = x2 - x1;
             let x = x1;
@@ -232,8 +244,12 @@ class Screen {
     function void drawCircle(int x, int y, int r) {
         var int b, sqrt;
 
+        if ( (x < 0 ) | (x > 511) | (y < 0) | (y > 255) ) {
+            do Sys.error(12); // illegal circle center coordinates
+        }
+
         if ( r > 181 ) {
-            do sys.error(13); // Illegal radius
+            do Sys.error(13); // Illegal radius
         }
 
         let b = y - r; // top of circle

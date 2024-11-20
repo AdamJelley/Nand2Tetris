@@ -46,6 +46,18 @@ pop that 0
 push constant 0
 return
 function Memory.alloc 2
+push argument 0
+push constant 0
+gt
+not
+not
+if-goto IF_FALSE0
+push constant 5
+call Sys.error 1
+pop temp 0
+goto IF_TRUE0
+label IF_FALSE0
+label IF_TRUE0
 push static 1
 pop local 0
 label WHILE_EXP0
@@ -68,13 +80,13 @@ push local 0
 push constant 0
 eq
 not
-if-goto IF_FALSE0
+if-goto IF_FALSE1
 push constant 6
-call sys.error 1
+call Sys.error 1
 pop temp 0
-goto IF_TRUE0
-label IF_FALSE0
-label IF_TRUE0
+goto IF_TRUE1
+label IF_FALSE1
+label IF_TRUE1
 goto WHILE_EXP0
 label WHILE_END0
 push local 0
@@ -193,59 +205,11 @@ add
 push argument 2
 eq
 not
-if-goto IF_FALSE1
-push argument 1
-push static 2
-add
-push argument 2
-push static 2
-add
-pop pointer 1
-push that 0
-pop temp 0
-pop pointer 1
-push temp 0
-pop that 0
-push argument 1
-push static 3
-add
-push argument 1
-push static 3
-add
-pop pointer 1
-push that 0
-push argument 2
-push static 3
-add
-pop pointer 1
-push that 0
-add
-push constant 2
-add
-pop temp 0
-pop pointer 1
-push temp 0
-pop that 0
-goto IF_TRUE1
-label IF_FALSE1
-label IF_TRUE1
-push argument 0
-push constant 2
-add
-push argument 0
-push static 3
-add
-pop pointer 1
-push that 0
-add
-push argument 1
-eq
-not
 if-goto IF_FALSE2
-push argument 0
+push argument 1
 push static 2
 add
-push argument 1
+push argument 2
 push static 2
 add
 pop pointer 1
@@ -254,15 +218,15 @@ pop temp 0
 pop pointer 1
 push temp 0
 pop that 0
-push argument 0
+push argument 1
 push static 3
 add
-push argument 0
+push argument 1
 push static 3
 add
 pop pointer 1
 push that 0
-push argument 1
+push argument 2
 push static 3
 add
 pop pointer 1
@@ -277,5 +241,53 @@ pop that 0
 goto IF_TRUE2
 label IF_FALSE2
 label IF_TRUE2
+push argument 0
+push constant 2
+add
+push argument 0
+push static 3
+add
+pop pointer 1
+push that 0
+add
+push argument 1
+eq
+not
+if-goto IF_FALSE3
+push argument 0
+push static 2
+add
+push argument 1
+push static 2
+add
+pop pointer 1
+push that 0
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push argument 0
+push static 3
+add
+push argument 0
+push static 3
+add
+pop pointer 1
+push that 0
+push argument 1
+push static 3
+add
+pop pointer 1
+push that 0
+add
+push constant 2
+add
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+goto IF_TRUE3
+label IF_FALSE3
+label IF_TRUE3
 push constant 0
 return
