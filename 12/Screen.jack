@@ -10,7 +10,7 @@
  * the screen is indexed (0,0).
  */
 class Screen {
-    static Array screen, powersOfTwo;
+    static Array screen, powersOfTwo, leftMasks, rightMasks;
     static int numRows;
     static boolean color;
 
@@ -27,10 +27,16 @@ class Screen {
         let n = 16;
         let i = 1;
         let powersOfTwo = Array.new(n);
+        let leftMasks = Array.new(n);
+        let rightMasks = Array.new(n);
         let powersOfTwo[0] = 1;
+        let rightMasks[0] = 1;
+        let leftMasks[0] = -1;
 
         while (i < n) {
             let powersOfTwo[i] = powersOfTwo[i - 1] + powersOfTwo[i - 1];
+            let rightMasks[i] = powersOfTwo[i] + rightMasks[i - 1];
+            let leftMasks[i] = leftMasks[i - 1] + leftMasks[i - 1];
             let i = i + 1;
         }
 
@@ -64,15 +70,21 @@ class Screen {
         }
 
         let address = (32 * y) + (x / 16);
-        let bit = x - ((x/16)*16);
+        let bit = x&15; // get x % 16
         let mask = powersOfTwo[bit];
+        do Screen.drawWord(address, mask);
+
+        return;
+    }
+
+    /** Updates the pixel mask at address, using the current color. */
+    function void drawWord(int address, int mask) {
         if ( color ) {
             let screen[address] = screen[address] | mask;
         }
         else {
             let screen[address] = screen[address] & ~mask;
         }
-
         return;
     }
 
@@ -178,21 +190,34 @@ class Screen {
 
     /** Draws a horizontal line from pixel (x1,y) to pixel (x2,y), using the current color. */
     function void drawHorLine(int y, int x1, int x2) {
-        var int dx, x, a;
+        var int a, x, start, end, startBit, endBit, leftMask, rightMask;
 
-        if ( x2 > x1 ) {
-            let dx = x2 - x1;
+        if ( x1 > x2 ) {
             let x = x1;
+            let x1 = x2;
+            let x2 = x;
+        }
+
+        let start = (32 * y) + (x1 / 16);
+        let end = (32 * y) + (x2 / 16);
+        let startBit = x1&15;
+        let endBit = x2&15;
+        let leftMask = leftMasks[startBit];
+        let rightMask = rightMasks[endBit];
+
+        if (start = end) { // all one word
+            do Screen.drawWord(start, leftMask & rightMask);
         }
         else {
-            let dx = x1 - x2;
-            let x = x2;
-        }
+            do Screen.drawWord(start, leftMask);
 
-        let a = 0;
-        while ( ~(a > dx)) {
-            do Screen.drawPixel(x+a, y);
-            let a = a + 1;
+            let a = 1;
+            while ( (start + a) < end ) {
+                do Screen.drawWord(start+a, true);
+                let a = a + 1;
+            }
+
+            do Screen.drawWord(end, rightMask);
         }
 
         return;
@@ -201,41 +226,51 @@ class Screen {
     /** Draws a filled rectangle whose top left corner is (x1, y1)
      * and bottom right corner is (x2,y2), using the current color. */
     function void drawRectangle(int x1, int y1, int x2, int y2) {
-        var int dx, dy, x, y, a;
+        var int a, b, x, y, start, end, startBit, endBit, leftMask, rightMask;
 
         if ( (x1 < 0 ) | (x1 > 511) | (y1 < 0) | (y1 > 255) | (x2 < 0 ) | (x2 > 511) | (y2 < 0) | (y2 > 255) ) {
             do Sys.error(9); // illegal rectangle coordinates
         }
 
-        if ( x1 < x2 ) {
-            let dx = x2 - x1;
-            let x = x1;
-        }
-        else {
-            let dx = x1 - x2;
-            let x = x2;
-        }
-        if ( y1 < y2 ) {
-            let dy = y2 - y1;
+        if ( y1 > y2 ) {
             let y = y1;
-        }
-        else {
-            let dy = y1 - y2;
-            let y = y2;
+            let y1 = y2;
+            let y2 = y;
         }
 
-        let a = 0;
-        if ( dy < dx ) {
-            while ( a < dy ) {
-                do Screen.drawHorLine(y + a, x1, x2);
-                let a = a + 1;
-            }
+        if ( x1 > x2 ) {
+            let x = x1;
+            let x1 = x2;
+            let x2 = x;
         }
-        else {
-            while ( a < dx ) {
-                do Screen.drawVertLine(x + a, y1, y2);
-                let a = a + 1;
+
+        let start = (32 * y1) + (x1 / 16);
+        let end = (32 * y1) + (x2 / 16);
+        let startBit = x1&15;
+        let endBit = x2&15;
+        let leftMask = leftMasks[startBit];
+        let rightMask = rightMasks[endBit];
+
+        let b = 0;
+        while ( (y1 + b) < (y2 + 1) ) {
+            if (start = end) { // all one word
+                do Screen.drawWord(start, leftMask & rightMask);
             }
+            else {
+                do Screen.drawWord(start, leftMask);
+
+                let a = 1;
+                while ( (start + a) < end ) {
+                    do Screen.drawWord(start+a, true);
+                    let a = a + 1;
+                }
+
+                do Screen.drawWord(end, rightMask);
+            }
+
+            let start = start + 32; // next row (increment y)
+            let end = end + 32; // next row (increment y)
+            let b = b + 1; // next row (increment y)
         }
         return;
     }
