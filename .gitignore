@@ -2,6 +2,9 @@
 .DS_Store
 *.zip
 *.ipynb
+.vscode
+demo
+13
 
 # Python
 __pycache__/

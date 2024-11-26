@@ -1,0 +1,225 @@
+/**
+ * Represents a Breakout game.
+ */
+class BreakoutGame {
+
+    field Ball ball;            // ball
+    field Paddle paddle;        // paddle
+    field int paddleWidth;      // width of paddle
+    field int paddleHeight;      // height of paddle
+    field Array bricks;          // bricks
+    field int numXBricks;        // num hoirzontal bricks
+    field int numYBricks;        // num vertical bricks
+    field int brickWidth;       // brick batWidth
+    field int brickHeight;      // brickHeight
+    field int leftWall;         // left wall position
+    field int rightWall;        // right wall position
+    field int topWall;          // top wall position
+    field int bottomWall;       // bottom wall position
+    field int wall;             // current wall the ball is bouncing off
+    field int lastWall;         // last wall the ball bounced from
+    field int score;            // current game score
+    field boolean exit;         // true when the game is over
+
+    /* Constructs a new Breakout game. */
+    constructor BreakoutGame new() {
+        var int i, j;
+        var Array rowBricks;
+
+        do Screen.clearScreen();
+
+        let paddleWidth = 40;  // initial paddle size
+        let paddleHeight = 7;  // paddle height
+        let paddle = Paddle.new(230, 248, paddleWidth, paddleHeight);
+
+        let ball = Ball.new(253, 240);
+        do ball.setDestination(400, 0);
+
+        let numXBricks = 5;
+        let numYBricks = 3;
+        let bricks = Array.new(numYBricks);
+        let brickWidth = ((484 - (2 * numXBricks)) / numXBricks);
+        let brickHeight = 60 / numYBricks;
+        let i = 0;
+        while ( i < numYBricks ) {
+            let bricks[i] = Array.new(numXBricks);
+            let rowBricks = bricks[i];
+            let j = 0;
+            while ( j < numXBricks ) {
+                let rowBricks[j] = Brick.new(16 + ((brickWidth + 2) * j), 30 + ((brickHeight + 2) * i), brickWidth, brickHeight);
+                let j = j + 1;
+            }
+            let i = i + 1;
+        }
+        do Screen.drawRectangle(0, 15, 511, 27);
+        do Screen.drawRectangle(0, 28 , 12, 255);
+        do Screen.drawRectangle(499, 28 , 511, 255);
+        let leftWall = 13;
+        let rightWall = 499 - ball.getSize() - 1;
+        let topWall = 28;
+        let bottomWall = 255 - paddleHeight - ball.getSize() - 1;
+        let lastWall = 0;
+        let score = 0;
+        let exit = false;
+
+        do Output.moveCursor(0,0);
+        do Output.printString("Score: 0");
+        do Output.moveCursor(0,28);
+        do Output.printString("BREAKOUT!");
+        do Output.moveCursor(0,44);
+        do Output.printString("Bricks remaining: ");
+        do Output.printInt((numXBricks * numYBricks));
+
+        return this;
+    }
+
+    /** Deallocates the object's memory. */
+    method void dispose() {
+        do paddle.dispose();
+        do ball.dispose();
+        do bricks.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    /** Starts the game, and handles input from the user that
+     * controls the paddle's movement direction.
+     */
+    method void run() {
+        var char key;
+
+        while ((~exit) & ~(score = (numXBricks * numYBricks))) {
+            // waits for a key to be pressed
+            while ((key = 0) & (~exit)) {
+                let key = Keyboard.keyPressed();
+                do paddle.move();
+                do moveBall();
+                do Sys.wait(50);
+            }
+
+            if (key = 130) { do paddle.setDirection(1); }
+            else {
+                if (key = 132) { do paddle.setDirection(2); }
+                else {
+                    if ((key = 131) | (key = 133)) { do paddle.setDirection(0); }
+                    else {
+                        if (key = 140) { let exit = true; }
+                    }
+                }
+            }
+
+            // Waits for the key to be released.
+            while ((~(key = 0)) & (~exit) & (~(score = (numXBricks * numYBricks)))) {
+                let key = Keyboard.keyPressed();
+                do paddle.move();
+                do moveBall();
+                do Sys.wait(50);
+            }
+        }
+
+        if (exit) {
+            do Output.moveCursor(11,27);
+            do Output.printString("Game Over!");
+            do Output.moveCursor(13,25);
+            do Output.printString("Final Score: ");
+            do Output.moveCursor(13,38);
+            do Output.printInt(score);
+        }
+
+        if ( score = (numXBricks * numYBricks) ) {
+            do Output.moveCursor(11,25);
+            do Output.printString("Congratulations!");
+            do Output.moveCursor(13,29);
+            do Output.printString("You win!");
+            do Output.moveCursor(15,25);
+            do Output.printString("Final Score: ");
+            do Output.moveCursor(15,38);
+            do Output.printInt(score);
+            do Sys.wait(500);
+        }
+        return;
+    }
+
+    /** Handles ball movement, including bouncing.
+      * If the ball bounces off a wall, calculate its new destination.
+      * End the game if the ball misses the paddle.
+      */
+    method void moveBall() {
+        var int face;
+        var Array pos;
+        var int x, y;
+        var int i, j;
+        var Array rowBricks;
+        var Brick brick;
+
+        do ball.hide();
+
+        let pos = ball.move();
+
+        let x = pos[0];
+        let y = pos[1];
+
+        if (~(x > leftWall)) {
+            let wall = 1;
+            let x = leftWall;
+            do ball.setX(x);
+        }
+        if (~(x < rightWall)) {
+            let wall = 2;
+            let x = rightWall;
+            do ball.setX(x);
+        }
+        if (~(y > topWall)) {
+            let wall = 3;
+            let y = topWall;
+            do ball.setY(y);
+        }
+        if (~(y < bottomWall)) {
+            let wall = 4;
+            let y = bottomWall;
+            do ball.setY(y);
+        }
+
+        let i = 0;
+        while ( i < numYBricks ) {
+            let rowBricks = bricks[i];
+            let j = 0;
+            while ( j < numXBricks ) {
+                let brick = rowBricks[j];
+                if (~(brick.broken())) {
+                    let face = brick.hit(ball.getLeft(), ball.getRight(), ball.getTop(), ball.getBottom());
+                    if (face > 0) {
+                        do ball.bounce(face);
+                        let wall = face;
+                        let lastWall = face;
+                        let score = score + 1;
+                        if ((score = 5) | (score = 10)) {
+                            do ball.increaseSpeed(1);
+                        }
+                        do Output.moveCursor(0, 7);
+                        do Output.printInt(score);
+                        do Output.moveCursor(0,62);
+                        do Output.printString("  ");
+                        do Output.moveCursor(0,62);
+                        do Output.printInt((numXBricks * numYBricks) - score);
+                    }
+                }
+                let j = j + 1;
+            }
+            let i = i + 1;
+        }
+
+        do ball.show();
+
+        if ((wall > 0) & (~(wall = lastWall))) {
+            if (wall = 4) {
+                let exit = ((paddle.getLeft() > ball.getRight()) | (paddle.getRight() < ball.getLeft()));
+                if (exit) { do ball.hide(); }
+            }
+            do ball.bounce(wall);
+            let lastWall = wall;
+        }
+
+        return;
+    }
+}
